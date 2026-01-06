@@ -1,0 +1,51 @@
+# Welcome to mod_gmi2html
+
+A powerful Apache module that converts Gemini format documents to HTML.
+
+## What is Gemini?
+
+Gemini is a lightweight markup language designed for personal publishing on the web. It sits between plain text and Markdown in terms of complexity.
+
+## Features of This Module
+
+* Fast conversion from .gmi to HTML
+* Full Gemini specification support
+* Apache 2.4+ compatibility
+* Easy to configure and deploy
+
+## Navigation
+
+=> https://geminiprotocol.net/ Official Gemini Protocol
+=> https://github.com/gemini-mailing-list/gemini-spec Gemini Specification Repository
+
+## Example Code
+
+Below is an example of what Gemini looks like:
+
+\`\`\`gemini
+# This is a heading
+
+This is regular text. It can wrap to any width.
+
+* Bullet points
+* Are supported
+* With proper formatting
+
+=> https://example.com Links are easy too
+\`\`\`
+
+## Getting Started
+
+1. Install the module according to the README
+2. Configure your Apache virtual host
+3. Place .gmi files in your document root
+4. Access them via HTTP
+
+## Block Quote Example
+
+> This module was inspired by mod_transform
+> but designed specifically for Gemini format
+
+## More Information
+
+For detailed documentation, see the included README.md file.

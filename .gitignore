@@ -1,0 +1,7 @@
+notes/
+src/mod_gmi2html.o 
+src/gemini_parser.o 
+mod_gmi2html.so 
+*.o
+src/*.o 
+src/*.so
