@@ -1,0 +1,80 @@
+/* Default Gemini to HTML Stylesheet */
+/* This is the built-in stylesheet used by mod_gmi2html */
+/* You can use this as a template to create your own custom stylesheet */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #333;
+}
+
+h1 {
+  font-size: 2em;
+  margin: 0.5em 0;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin: 0.67em 0;
+}
+
+h3 {
+  font-size: 1.2em;
+  margin: 0.83em 0;
+}
+
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 15px;
+  overflow-x: auto;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+blockquote {
+  border-left: 4px solid #ddd;
+  margin: 0;
+  padding-left: 15px;
+  color: #666;
+}
+
+ul {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+li {
+  margin: 0.5em 0;
+}
+
+code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+.gemini-link {
+  display: block;
+  margin: 0.5em 0;
+  padding: 0.5em;
+  background: #f9f9f9;
+  border-left: 3px solid #0066cc;
+  padding-left: 12px;
+}
+
+.gemini-link a {
+  font-weight: bold;
+}

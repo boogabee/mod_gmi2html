@@ -7,6 +7,7 @@ A lightweight Apache webserver module written in C that converts Gemini format (
 - **Gemini Format Support**: Full support for Gemini text format (v0.16.0 specification)
 - **On-the-fly Conversion**: Automatically converts .gmi files to HTML without needing pre-conversion
 - **Clean HTML Output**: Generates semantic, responsive HTML with built-in CSS styling
+- **Custom Stylesheets**: Use your own CSS stylesheet instead of the built-in default (NEW)
 - **Line Type Support**:
   - Text paragraphs
   - Headings (H1, H2, H3)
@@ -17,6 +18,7 @@ A lightweight Apache webserver module written in C that converts Gemini format (
   - Code blocks
   - **Horizontal rules** (new)
 - **Enhancement Features** (v1.1+):
+  - **Custom Stylesheet Support**: Use the `Gmi2HtmlStylesheet` directive to specify a custom CSS file
   - **Horizontal Rule Support**: Render `---` as `<hr>` tags for visual separation
   - **Page Title Extraction**: Auto-extract first heading as HTML page title
   - **Link Path Conversion**: Auto-convert .gmi links to .html for web serving
@@ -124,6 +126,39 @@ Enables or disables the Gemini to HTML conversion for the current directory scop
     Gmi2HtmlEnabled on
 </Directory>
 ```
+
+#### `Gmi2HtmlStylesheet <path>`
+
+Specifies a custom CSS stylesheet file to use instead of the built-in default stylesheet.
+
+- **Syntax**: `Gmi2HtmlStylesheet <path>`
+- **Context**: Directory, .htaccess
+- **Default**: Built-in stylesheet
+- **Path**: Can be absolute or relative to the server's working directory
+- **Fallback**: If the file cannot be found or read, the module uses the built-in stylesheet
+
+**Example with absolute path**:
+```apache
+<Directory /var/www/gemini>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/custom.css
+</Directory>
+```
+
+**Example with multiple stylesheets for different sections**:
+```apache
+<Directory /var/www/gemini/blog>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/blog.css
+</Directory>
+
+<Directory /var/www/gemini/docs>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/docs.css
+</Directory>
+```
+
+See the `examples/` directory for stylesheet templates and detailed customization guide.
 
 ### Apache Handler Assignment
 
