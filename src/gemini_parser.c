@@ -2,6 +2,22 @@
 #include <string.h>
 #include <ctype.h>
 
+/* Built-in CSS stylesheet */
+static const char *BUILTIN_STYLESHEET = 
+    "    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; }\n"
+    "    h1 { font-size: 2em; margin: 0.5em 0; }\n"
+    "    h2 { font-size: 1.5em; margin: 0.67em 0; }\n"
+    "    h3 { font-size: 1.2em; margin: 0.83em 0; }\n"
+    "    a { color: #0066cc; text-decoration: none; }\n"
+    "    a:hover { text-decoration: underline; }\n"
+    "    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 4px; font-family: 'Courier New', monospace; }\n"
+    "    blockquote { border-left: 4px solid #ddd; margin: 0; padding-left: 15px; color: #666; }\n"
+    "    ul { margin: 1em 0; padding-left: 2em; }\n"
+    "    li { margin: 0.5em 0; }\n"
+    "    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }\n"
+    "    .gemini-link { display: block; margin: 0.5em 0; padding: 0.5em; background: #f9f9f9; border-left: 3px solid #0066cc; padding-left: 12px; }\n"
+    "    .gemini-link a { font-weight: bold; }\n";
+
 /* Forward declarations */
 static char *convert_link_path(const char *url);
 static char *process_inline_code(const char *text);
@@ -376,6 +392,11 @@ GeminiDocument *gemini_parse(const char *content, size_t length) {
 
 /* Convert Gemini document to HTML */
 char *gemini_to_html(GeminiDocument *doc, const char *title) {
+    return gemini_to_html_with_stylesheet(doc, title, NULL);
+}
+
+/* Convert Gemini document to HTML with custom stylesheet */
+char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, const char *stylesheet) {
     if (!doc) return NULL;
     
     /* Build HTML string */
@@ -384,6 +405,9 @@ char *gemini_to_html(GeminiDocument *doc, const char *title) {
     if (!html) return NULL;
     
     size_t pos = 0;
+    
+    /* Use custom stylesheet or built-in */
+    const char *css = stylesheet ? stylesheet : BUILTIN_STYLESHEET;
     
     /* HTML header */
     pos += snprintf(html + pos, buffer_size - pos,
@@ -394,23 +418,12 @@ char *gemini_to_html(GeminiDocument *doc, const char *title) {
         "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
         "  <title>%s</title>\n"
         "  <style>\n"
-        "    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; }\n"
-        "    h1 { font-size: 2em; margin: 0.5em 0; }\n"
-        "    h2 { font-size: 1.5em; margin: 0.67em 0; }\n"
-        "    h3 { font-size: 1.2em; margin: 0.83em 0; }\n"
-        "    a { color: #0066cc; text-decoration: none; }\n"
-        "    a:hover { text-decoration: underline; }\n"
-        "    pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 4px; font-family: 'Courier New', monospace; }\n"
-        "    blockquote { border-left: 4px solid #ddd; margin: 0; padding-left: 15px; color: #666; }\n"
-        "    ul { margin: 1em 0; padding-left: 2em; }\n"
-        "    li { margin: 0.5em 0; }\n"
-        "    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }\n"
-        "    .gemini-link { display: block; margin: 0.5em 0; padding: 0.5em; background: #f9f9f9; border-left: 3px solid #0066cc; padding-left: 12px; }\n"
-        "    .gemini-link a { font-weight: bold; }\n"
+        "%s"
         "  </style>\n"
         "</head>\n"
         "<body>\n",
-        doc->page_title ? doc->page_title : (title ? title : "Gemini Document"));
+        doc->page_title ? doc->page_title : (title ? title : "Gemini Document"),
+        css);
     
     int in_list = 0;
     int in_preformat = 0;

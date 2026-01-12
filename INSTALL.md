@@ -116,6 +116,22 @@ Create a configuration file `/etc/apache2/sites-available/gemini.conf`:
 </VirtualHost>
 ```
 
+To use a custom stylesheet, add the `Gmi2HtmlStylesheet` directive:
+
+```apache
+<Directory /var/www/gemini>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/custom.css
+    AddHandler gmi2html .gmi
+    AddType text/gemini .gmi
+    Options -Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
+```
+
+See the `examples/` directory for stylesheet templates and usage examples.
+
 ### 6. Enable the Site
 
 #### Debian/Ubuntu
@@ -277,7 +293,75 @@ sudo systemctl restart apache2
 1. Read the README.md for detailed usage
 2. Check apache-config.conf for more configuration examples
 3. Review example.gmi for Gemini syntax examples
-4. Configure custom CSS styling if needed
+4. Configure custom CSS styling if needed (see Custom Stylesheets section below)
+
+## Custom Stylesheets
+
+The mod_gmi2html module supports custom CSS stylesheets via the `Gmi2HtmlStylesheet` directive.
+
+### Using a Custom Stylesheet
+
+1. Create or prepare your CSS stylesheet file
+2. Ensure Apache can read it (proper permissions)
+3. Add the directive to your Apache configuration:
+
+```apache
+<Directory /var/www/gemini>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/custom.css
+    AddHandler gmi2html .gmi
+    AddType text/gemini .gmi
+</Directory>
+```
+
+### Example Stylesheets
+
+The `examples/` directory contains:
+- `default-stylesheet.css` - The built-in stylesheet
+- `dark-mode-stylesheet.css` - A dark mode example
+- `README.md` - Detailed stylesheet guide
+
+### Stylesheet Path
+
+The `Gmi2HtmlStylesheet` directive accepts:
+- **Absolute paths**: `/var/www/stylesheets/custom.css`
+- **Relative paths**: `stylesheets/custom.css` (relative to server's working directory)
+
+If the file cannot be found or read, the module automatically falls back to the built-in stylesheet.
+
+### Important CSS Elements
+
+Your custom stylesheet should define at minimum:
+- `body` - Main document styling
+- `h1, h2, h3` - Heading levels
+- `a` - Links
+- `pre` - Code blocks
+- `code` - Inline code
+- `blockquote` - Block quotes
+- `ul, li` - Lists
+- `.gemini-link` - Gemini link styling
+
+See the stylesheet examples for a complete reference.
+
+### Multiple Stylesheets
+
+Use different stylesheets for different directories:
+
+```apache
+<Directory /var/www/gemini/blog>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/blog.css
+    AddHandler gmi2html .gmi
+    AddType text/gemini .gmi
+</Directory>
+
+<Directory /var/www/gemini/docs>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlStylesheet /var/www/stylesheets/docs.css
+    AddHandler gmi2html .gmi
+    AddType text/gemini .gmi
+</Directory>
+```
 
 ## Getting Help
 
@@ -285,3 +369,4 @@ sudo systemctl restart apache2
 2. Verify module compilation: `make test`
 3. Test configuration: `apachectl configtest`
 4. Review gemini_specification.txt for format validation
+5. Check examples/ directory for stylesheet examples

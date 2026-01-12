@@ -25,6 +25,7 @@ module AP_MODULE_DECLARE_DATA gmi2html_module;
 typedef struct {
     int enabled;
     const char *gemini_type;
+    const char *stylesheet_path;  /* Path to custom stylesheet file */
 } gmi2html_config;
 
 /* Get module configuration */
@@ -39,6 +40,7 @@ static void *create_dir_config(apr_pool_t *p, char *dir) {
     gmi2html_config *cfg = apr_pcalloc(p, sizeof(gmi2html_config));
     cfg->enabled = 0;  /* Disabled by default */
     cfg->gemini_type = "text/gemini";
+    cfg->stylesheet_path = NULL;  /* No custom stylesheet by default */
     return cfg;
 }
 
@@ -50,6 +52,7 @@ static void *merge_dir_config(apr_pool_t *p, void *base_conf, void *new_conf) {
     
     merged->enabled = new->enabled ? new->enabled : base->enabled;
     merged->gemini_type = new->gemini_type ? new->gemini_type : base->gemini_type;
+    merged->stylesheet_path = new->stylesheet_path ? new->stylesheet_path : base->stylesheet_path;
     
     return merged;
 }
@@ -71,6 +74,15 @@ static const char *set_gmi2html_enabled(cmd_parms *cmd, void *config,
     return NULL;
 }
 
+/* Configuration directive: Gmi2HtmlStylesheet <path> */
+static const char *set_gmi2html_stylesheet(cmd_parms *cmd, void *config, 
+                                          const char *arg) {
+    (void)cmd;  /* Unused */
+    gmi2html_config *cfg = (gmi2html_config *)config;
+    cfg->stylesheet_path = arg;
+    return NULL;
+}
+
 /* Configuration directives */
 static const command_rec gmi2html_directives[] = {
     AP_INIT_TAKE1("Gmi2HtmlEnabled", 
@@ -78,6 +90,11 @@ static const command_rec gmi2html_directives[] = {
                   NULL, 
                   OR_OPTIONS,
                   "Enable or disable Gemini to HTML conversion (on|off)"),
+    AP_INIT_TAKE1("Gmi2HtmlStylesheet",
+                  set_gmi2html_stylesheet,
+                  NULL,
+                  OR_OPTIONS,
+                  "Path to custom CSS stylesheet file (optional)"),
     { NULL }
 };
 
@@ -154,8 +171,39 @@ static int gmi2html_handler(request_rec *r) {
         *dot = '\0';
     }
     
-    /* Convert to HTML */
-    char *html = gemini_to_html(doc, title);
+    /* Load custom stylesheet if configured */
+    char *custom_stylesheet = NULL;
+    if (cfg->stylesheet_path) {
+        apr_file_t *style_file;
+        apr_finfo_t style_finfo;
+        
+        /* Check if stylesheet file exists and is readable */
+        if (apr_stat(&style_finfo, cfg->stylesheet_path, APR_FINFO_SIZE, r->pool) == APR_SUCCESS &&
+            style_finfo.filetype == APR_REG) {
+            
+            /* Try to open and read the stylesheet */
+            if (apr_file_open(&style_file, cfg->stylesheet_path, APR_READ, 
+                            APR_OS_DEFAULT, r->pool) == APR_SUCCESS) {
+                
+                custom_stylesheet = apr_palloc(r->pool, style_finfo.size + 1);
+                apr_size_t style_bytes_read;
+                
+                if (custom_stylesheet &&
+                    apr_file_read_full(style_file, custom_stylesheet, style_finfo.size, 
+                                     &style_bytes_read) == APR_SUCCESS &&
+                    style_bytes_read == (apr_size_t)style_finfo.size) {
+                    custom_stylesheet[style_finfo.size] = '\0';
+                } else {
+                    custom_stylesheet = NULL;  /* Failed to read, use default */
+                }
+                
+                apr_file_close(style_file);
+            }
+        }
+    }
+    
+    /* Convert to HTML with optional custom stylesheet */
+    char *html = gemini_to_html_with_stylesheet(doc, title, custom_stylesheet);
     if (!html) {
         gemini_document_free(doc);
         return HTTP_INTERNAL_SERVER_ERROR;
