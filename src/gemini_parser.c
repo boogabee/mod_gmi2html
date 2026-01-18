@@ -399,8 +399,8 @@ char *gemini_to_html(GeminiDocument *doc, const char *title) {
 char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, const char *stylesheet) {
     if (!doc) return NULL;
     
-    /* Build HTML string */
-    size_t buffer_size = 8192;
+    /* Build HTML string - start with larger buffer to reduce reallocs */
+    size_t buffer_size = 65536;  /* Start with 64KB instead of 8KB */
     char *html = malloc(buffer_size);
     if (!html) return NULL;
     
@@ -431,6 +431,17 @@ char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, con
     
     for (size_t i = 0; i < doc->line_count; i++) {
         GeminiLine *line = &doc->lines[i];
+        
+        /* Expand buffer if getting full (be conservative - expand at 75% capacity) */
+        if (pos > buffer_size * 3 / 4) {
+            buffer_size *= 2;
+            char *new_html = realloc(html, buffer_size);
+            if (!new_html) {
+                free(html);
+                return NULL;
+            }
+            html = new_html;
+        }
         
         /* Close open tags if needed */
         if (in_list && line->type != LINE_TYPE_LIST_ITEM) {
@@ -531,17 +542,6 @@ char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, con
                 }
                 break;
             }
-        }
-        
-        /* Expand buffer if getting full */
-        if (pos > buffer_size - 1024) {
-            buffer_size *= 2;
-            char *new_html = realloc(html, buffer_size);
-            if (!new_html) {
-                free(html);
-                return NULL;
-            }
-            html = new_html;
         }
     }
     
