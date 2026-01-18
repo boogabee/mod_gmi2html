@@ -7,7 +7,8 @@ A lightweight Apache webserver module written in C that converts Gemini format (
 - **Gemini Format Support**: Full support for Gemini text format (v0.16.0 specification)
 - **On-the-fly Conversion**: Automatically converts .gmi files to HTML without needing pre-conversion
 - **Clean HTML Output**: Generates semantic, responsive HTML with built-in CSS styling
-- **Custom Stylesheets**: Use your own CSS stylesheet instead of the built-in default (NEW)
+- **Custom Stylesheets**: Use your own CSS stylesheet instead of the built-in default
+- **Custom Head Content**: Add meta tags, icons, analytics, PWA support, and more to the `<head>` section
 - **Line Type Support**:
   - Text paragraphs
   - Headings (H1, H2, H3)
@@ -16,7 +17,7 @@ A lightweight Apache webserver module written in C that converts Gemini format (
   - Lists (unordered)
   - Block quotes
   - Code blocks
-  - **Horizontal rules** (new)
+  - Horizontal rules
 - **Enhancement Features** (v1.1+):
   - **Custom Stylesheet Support**: Use the `Gmi2HtmlStylesheet` directive to specify a custom CSS file
   - **Horizontal Rule Support**: Render `---` as `<hr>` tags for visual separation
@@ -24,6 +25,8 @@ A lightweight Apache webserver module written in C that converts Gemini format (
   - **Link Path Conversion**: Auto-convert .gmi links to .html for web serving
   - **Inline Code**: Space-delimited backticks ` code ` render as `<code>`
   - **Inline Bold**: Space-delimited asterisks **text** render as `<strong>`
+- **Enhancement Features** (v1.2+):
+  - **Custom Head Content**: Use the `Gmi2HtmlHead` directive to add custom `<head>` content
 
 ## Installation
 
@@ -159,6 +162,33 @@ Specifies a custom CSS stylesheet file to use instead of the built-in default st
 ```
 
 See the `examples/` directory for stylesheet templates and detailed customization guide.
+
+#### `Gmi2HtmlHead <path>`
+
+Specifies a custom HTML file containing `<head>` section content (meta tags, icons, analytics, etc.) to include in generated pages.
+
+- **Syntax**: `Gmi2HtmlHead <path>`
+- **Context**: Directory, .htaccess
+- **Default**: None (custom head content is optional)
+- **Path**: Can be absolute or relative to the server's working directory
+- **Fallback**: If the file cannot be found or read, the module silently skips it
+
+**Example**:
+```apache
+<Directory /var/www/gemini>
+    Gmi2HtmlEnabled on
+    Gmi2HtmlHead /etc/apache2/gmi2html/head-content.html
+</Directory>
+```
+
+**Common uses**:
+- SEO meta tags (description, keywords, author)
+- Site icons (favicon, apple-touch-icon)
+- Social media tags (Open Graph, Twitter Card)
+- Analytics code (Google Analytics, Plausible)
+- PWA support (manifest, theme-color)
+
+See the `examples/` directory for ready-to-use head content templates and detailed configuration guide.
 
 ### Apache Handler Assignment
 

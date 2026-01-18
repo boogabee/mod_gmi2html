@@ -271,6 +271,6 @@ Remove .gmi extension with mod_rewrite:
 
 ---
 
-**Version**: 1.0  
+**Version**: 1.2  
 **Last Updated**: January 2026  
 **License**: Open Source

@@ -1,8 +1,26 @@
-# Custom Stylesheet Examples for mod_gmi2html
+# Custom Stylesheets and Head Content Examples for mod_gmi2html
 
-This directory contains example stylesheets that can be used with the mod_gmi2html Apache module.
+This directory contains:
+- Example stylesheets and head content files for customizing mod_gmi2html output
+- Detailed documentation about features and configuration
+- Ready-to-use templates for common use cases
 
-## Usage
+For basic module operation and directive overview, see the main [README.md](../README.md).
+
+## Documentation
+
+### Quick Start
+- **[README.md](README.md)** (this file) - Examples and templates
+
+### Detailed Reference
+- **[CUSTOM_HEAD_DOCUMENTATION_INDEX.md](CUSTOM_HEAD_DOCUMENTATION_INDEX.md)** - Navigation guide to all head content resources
+- **[CUSTOM_HEAD_FEATURE.md](CUSTOM_HEAD_FEATURE.md)** - Complete custom head content feature documentation
+- **[CUSTOM_HEAD_IMPLEMENTATION.md](CUSTOM_HEAD_IMPLEMENTATION.md)** - Implementation details and internals
+- **[HEAD_CONFIGURATION_EXAMPLES.md](HEAD_CONFIGURATION_EXAMPLES.md)** - Advanced Apache configuration patterns
+
+## Stylesheets
+
+### Usage
 
 To use a custom stylesheet with mod_gmi2html, add the `Gmi2HtmlStylesheet` directive to your Apache configuration:
 

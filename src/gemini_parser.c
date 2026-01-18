@@ -397,6 +397,11 @@ char *gemini_to_html(GeminiDocument *doc, const char *title) {
 
 /* Convert Gemini document to HTML with custom stylesheet */
 char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, const char *stylesheet) {
+    return gemini_to_html_with_stylesheet_and_head(doc, title, stylesheet, NULL);
+}
+
+/* Convert Gemini document to HTML with custom stylesheet and custom head content */
+char *gemini_to_html_with_stylesheet_and_head(GeminiDocument *doc, const char *title, const char *stylesheet, const char *custom_head) {
     if (!doc) return NULL;
     
     /* Build HTML string - start with larger buffer to reduce reallocs */
@@ -409,20 +414,28 @@ char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, con
     /* Use custom stylesheet or built-in */
     const char *css = stylesheet ? stylesheet : BUILTIN_STYLESHEET;
     
-    /* HTML header */
+    /* HTML header with standard meta tags and stylesheet */
     pos += snprintf(html + pos, buffer_size - pos,
         "<!DOCTYPE html>\n"
         "<html>\n"
         "<head>\n"
         "  <meta charset=\"UTF-8\">\n"
         "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-        "  <title>%s</title>\n"
+        "  <title>%s</title>\n",
+        doc->page_title ? doc->page_title : (title ? title : "Gemini Document"));
+    
+    /* Add custom head content if provided */
+    if (custom_head) {
+        pos += snprintf(html + pos, buffer_size - pos, "%s\n", custom_head);
+    }
+    
+    /* Add stylesheet */
+    pos += snprintf(html + pos, buffer_size - pos,
         "  <style>\n"
         "%s"
         "  </style>\n"
         "</head>\n"
         "<body>\n",
-        doc->page_title ? doc->page_title : (title ? title : "Gemini Document"),
         css);
     
     int in_list = 0;

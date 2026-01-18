@@ -26,6 +26,7 @@ typedef struct {
     int enabled;
     const char *gemini_type;
     const char *stylesheet_path;  /* Path to custom stylesheet file */
+    const char *head_file_path;    /* Path to custom head content file */
 } gmi2html_config;
 
 /* Get module configuration */
@@ -41,6 +42,7 @@ static void *create_dir_config(apr_pool_t *p, char *dir) {
     cfg->enabled = 0;  /* Disabled by default */
     cfg->gemini_type = "text/gemini";
     cfg->stylesheet_path = NULL;  /* No custom stylesheet by default */
+    cfg->head_file_path = NULL;    /* No custom head content by default */
     return cfg;
 }
 
@@ -53,6 +55,7 @@ static void *merge_dir_config(apr_pool_t *p, void *base_conf, void *new_conf) {
     merged->enabled = new->enabled ? new->enabled : base->enabled;
     merged->gemini_type = new->gemini_type ? new->gemini_type : base->gemini_type;
     merged->stylesheet_path = new->stylesheet_path ? new->stylesheet_path : base->stylesheet_path;
+    merged->head_file_path = new->head_file_path ? new->head_file_path : base->head_file_path;
     
     return merged;
 }
@@ -83,6 +86,15 @@ static const char *set_gmi2html_stylesheet(cmd_parms *cmd, void *config,
     return NULL;
 }
 
+/* Configuration directive: Gmi2HtmlHead <path> */
+static const char *set_gmi2html_head(cmd_parms *cmd, void *config, 
+                                    const char *arg) {
+    (void)cmd;  /* Unused */
+    gmi2html_config *cfg = (gmi2html_config *)config;
+    cfg->head_file_path = arg;
+    return NULL;
+}
+
 /* Configuration directives */
 static const command_rec gmi2html_directives[] = {
     AP_INIT_TAKE1("Gmi2HtmlEnabled", 
@@ -95,6 +107,11 @@ static const command_rec gmi2html_directives[] = {
                   NULL,
                   OR_OPTIONS,
                   "Path to custom CSS stylesheet file (optional)"),
+    AP_INIT_TAKE1("Gmi2HtmlHead",
+                  set_gmi2html_head,
+                  NULL,
+                  OR_OPTIONS,
+                  "Path to custom <head> content file with meta tags, icons, etc. (optional)"),
     { NULL }
 };
 
@@ -202,8 +219,39 @@ static int gmi2html_handler(request_rec *r) {
         }
     }
     
-    /* Convert to HTML with optional custom stylesheet */
-    char *html = gemini_to_html_with_stylesheet(doc, title, custom_stylesheet);
+    /* Load custom head content if configured */
+    char *custom_head = NULL;
+    if (cfg->head_file_path) {
+        apr_file_t *head_file;
+        apr_finfo_t head_finfo;
+        
+        /* Check if head file exists and is readable */
+        if (apr_stat(&head_finfo, cfg->head_file_path, APR_FINFO_SIZE, r->pool) == APR_SUCCESS &&
+            head_finfo.filetype == APR_REG) {
+            
+            /* Try to open and read the head file */
+            if (apr_file_open(&head_file, cfg->head_file_path, APR_READ, 
+                            APR_OS_DEFAULT, r->pool) == APR_SUCCESS) {
+                
+                custom_head = apr_palloc(r->pool, head_finfo.size + 1);
+                apr_size_t head_bytes_read;
+                
+                if (custom_head &&
+                    apr_file_read_full(head_file, custom_head, head_finfo.size, 
+                                     &head_bytes_read) == APR_SUCCESS &&
+                    head_bytes_read == (apr_size_t)head_finfo.size) {
+                    custom_head[head_finfo.size] = '\0';
+                } else {
+                    custom_head = NULL;  /* Failed to read, skip custom head */
+                }
+                
+                apr_file_close(head_file);
+            }
+        }
+    }
+    
+    /* Convert to HTML with optional custom stylesheet and custom head content */
+    char *html = gemini_to_html_with_stylesheet_and_head(doc, title, custom_stylesheet, custom_head);
     if (!html) {
         gemini_document_free(doc);
         return HTTP_INTERNAL_SERVER_ERROR;

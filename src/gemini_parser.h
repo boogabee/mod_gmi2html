@@ -69,6 +69,16 @@ char *gemini_to_html(GeminiDocument *doc, const char *title);
 char *gemini_to_html_with_stylesheet(GeminiDocument *doc, const char *title, const char *stylesheet);
 
 /**
+ * Convert parsed Gemini document to HTML with custom stylesheet and head content
+ * @param doc: Parsed Gemini document
+ * @param title: Optional title for the HTML document
+ * @param stylesheet: Custom CSS stylesheet (NULL to use built-in)
+ * @param custom_head: Custom <head> content such as meta tags or icons (NULL to skip)
+ * @return: HTML string (must be freed by caller)
+ */
+char *gemini_to_html_with_stylesheet_and_head(GeminiDocument *doc, const char *title, const char *stylesheet, const char *custom_head);
+
+/**
  * Free a parsed Gemini document
  * @param doc: Document to free
  */
